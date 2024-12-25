@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Интерпретатор ЯП</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px;
+        }
+        #codeEditor {
+            width: 80%;
+            height: 200px;
+            font-family: monospace;
+            border: 1px solid #ccc;
+            padding: 10px;
+            resize: none;
+        }
+        #display {
+            width: 512px; /* 128 * 4 */
+            height: 128px; /* 32 * 4 */
+            background-color: black;
+            margin-top: 10px;
+            color: white; /* Цвет текста */
+            font-family: monospace; /* Шрифт для текста */
+            position: relative;
+            overflow: hidden; /* Скрыть переполнение */
+        }
+        button {
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Интерпретатор ЯП</h1>
+<textarea id="codeEditor" placeholder="Введите код ЯП здесь..."></textarea><br>
+<button onclick="runCode()">Выполнить</button>
+<button onclick="clearScreen()">Очистить экран</button>
+<button onclick="endGame()">Завершить</button>
+<button onclick="showHelp()">Помощь</button>
+
+<canvas id="display" width="512" height="128"></canvas>
+
+<script>
+    const canvas = document.getElementById('display');
+    const ctx = canvas.getContext('2d');
+    const pixelSize = 4; // Размер одной точки в пикселях
+
+    function clearScreen() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function endGame() {
+        clearScreen();
+        alert('Программа завершена.');
+    }
+
+    function showHelp() {
+        alert("Синтаксис ЯП:\n1. INIT\n2. CLEAR_SCREEN\n3. SET_VARIABLE A 45\n4. INPUT A \"Введите значение x: \"\n5. CALCULATE B = A * A + 2 * A + 1\n6. SHOW_MESSAGE B 3\n7. LINE x1 y1 x2 y2\n8. PLOT A^2 + 2*A + 1\n9. WAIT 2000\n10. END_GAME\n11. DRAW_PIXEL x y\n12. CREATE_OBJECT player\n13. SET_POSITION player 10 10\n14. MOVE_OBJECT player UP 1\n15. ADD_EVENT KEY_PRESS\n16. ON_EVENT KEY_PRESS MOVE_OBJECT player RIGHT 1\n17. SOLVE A^2 + 2*A + 1 = 0\n18. IF B < 0\n19. ELSE\n20. ENDIF\n21. FOR I = 1 TO 10\n22. NEXT\n23. CREATE_ARRAY myArray 10\n24. SET_ARRAY_VALUE myArray 0 5\n25. GET_ARRAY_VALUE myArray 0 A");
+    }
+
+    function runCode() {
+        const code = document.getElementById('codeEditor').value.split('\n');
+        let variables = {};
+        let currentLoop = null;
+        let conditionStack = []; // Стек для условий
+        let skipToEndIf = false; // Флаг для пропуска до ENDIF
+
+        for (let line of code) {
+            line = line.trim();
+            if (line.startsWith('INIT')) {
+                // Инициализация программы
+            } else if (line.startsWith('CLEAR_SCREEN')) {
+                clearScreen();
+            } else if (line.startsWith('SET_VARIABLE')) {
+                const parts = line.split(' ');
+                variables[parts[1]] = parseFloat(parts[2]);
+            } else if (line.startsWith('INPUT')) {
+                const parts = line.split(' ');
+                const promptMessage = parts.slice(2).join (' ').replace(/"/g, '');
+                const userInput = prompt(promptMessage);
+                variables[parts[1]] = parseFloat(userInput);
+            } else if (line.startsWith('CALCULATE')) {
+                const parts = line.split('=');
+                const expression = parts[1].trim();
+                const result = eval(expression.replace(/([A-J])/g, (match) => variables[match] || 0));
+                variables[parts[0].split(' ')[1]] = result;
+            } else if (line.startsWith('SHOW_MESSAGE')) {
+                const parts = line.split(' ');
+                const variableName = parts[1];
+                const message = parts.slice(2).join(' ').replace(/"/g, '');
+                const number = variables[variableName] !== undefined ? variables[variableName] : 'undefined';
+                displayMessage(number, message);
+            } else if (line.startsWith('LINE')) {
+                const parts = line.split(' ');
+                const x1 = parseVariable(parts[1], variables);
+                const y1 = parseVariable(parts[2], variables);
+                const x2 = parseVariable(parts[3], variables);
+                const y2 = parseVariable(parts[4], variables);
+                drawLine(x1, y1, x2, y2);
+            } else if (line.startsWith('PLOT')) {
+                const expression = line.split(' ')[1];
+                plotEquation(expression);
+            } else if (line.startsWith('WAIT')) {
+                const waitTime = parseInt(line.split(' ')[1]);
+                // Здесь можно добавить задержку, но в реальном времени это не будет работать в браузере
+            } else if (line.startsWith('END_GAME')) {
+                alert('Программа завершена.');
+                break;
+            } else if (line.startsWith('DRAW_PIXEL')) {
+                const parts = line.split(' ');
+                const x = parseVariable(parts[1], variables);
+                const y = parseVariable(parts[2], variables);
+                drawPixel(x, y);
+            } else if (line.startsWith('CREATE_OBJECT')) {
+                // Логика создания объекта (если требуется)
+            } else if (line.startsWith('SET_POSITION')) {
+                // Логика установки позиции объекта (если требуется)
+            } else if (line.startsWith('MOVE_OBJECT')) {
+                // Логика перемещения объекта (если требуется)
+            } else if (line.startsWith('ADD_EVENT')) {
+                // Логика добавления события (если требуется)
+            } else if (line.startsWith('ON_EVENT')) {
+                // Логика обработки события (если требуется)
+            } else if (line.startsWith('SOLVE')) {
+                const equation = line.slice(6).trim(); // Извлекаем уравнение
+                const result = solveEquation(equation);
+                displayMessage(result, "Решение уравнения:");
+            } else if (line.startsWith('IF')) {
+                const condition = line.slice(3).trim();
+                const parts = condition.split(' ');
+                const leftVar = parts[0];
+                const operator = parts[1];
+                const rightVar = parts[2];
+                const leftValue = parseVariable(leftVar, variables);
+                const rightValue = parseVariable(rightVar, variables);
+                let conditionMet = false;
+
+                if (operator === '<') {
+                    conditionMet = leftValue < rightValue;
+                } else if (operator === '>') {
+                    conditionMet = leftValue > rightValue;
+                } else if (operator === '==') {
+                    conditionMet = leftValue === rightValue;
+                } // Добавьте другие операторы по мере необходимости
+
+                conditionStack.push(conditionMet);
+                skipToEndIf = !conditionMet; // Устанавливаем флаг, если условие не выполнено
+            } else if (line.startsWith('ELSE')) {
+                if (conditionStack.length > 0) {
+                    skipToEndIf = conditionStack[conditionStack.length - 1]; // Переключаем флаг
+                }
+            } else if (line.startsWith('ENDIF')) {
+                conditionStack.pop(); // Удаляем условие из стека
+                skipToEndIf = false; // Сбрасываем флаг
+            } else if (!skipToEndIf) {
+                // Обработка других команд только если условие выполнено
+                if (line.startsWith('FOR')) {
+                    const loopParts = line.split(' ');
+                    const loopVar = loopParts[1];
+                    const start = parseInt(loopParts[3]);
+                    const end = parseInt(loopParts[5]);
+                    currentLoop = { loopVar, start, end, current: start };
+                } else if (line.startsWith('NEXT')) {
+                    if (currentLoop) {
+                        if (currentLoop.current < currentLoop.end) {
+ currentLoop.current++;
+                        } else {
+                            currentLoop = null;
+                        }
+                    }
+                } else if (line.startsWith('CREATE_ARRAY')) {
+                    const parts = line.split(' ');
+                    const arrayName = parts[1];
+                    const size = parseInt(parts[2]);
+                    variables[arrayName] = new Array(size).fill(0);
+                } else if (line.startsWith('SET_ARRAY_VALUE')) {
+                    const parts = line.split(' ');
+                    const arrayName = parts[1];
+                    const index = parseInt(parts[2]);
+                    const value = parseFloat(parts[3]);
+                    if (variables[arrayName]) {
+                        variables[arrayName][index] = value;
+                    }
+                } else if (line.startsWith('GET_ARRAY_VALUE')) {
+                    const parts = line.split(' ');
+                    const arrayName = parts[1];
+                    const index = parseInt(parts[2]);
+                    const variableName = parts[3];
+                    if (variables[arrayName]) {
+                        variables[variableName] = variables[arrayName][index];
+                    }
+                }
+            }
+        }
+    }
+
+    function displayMessage(number, message) {
+        clearScreen();
+        ctx.fillStyle = 'white';
+        ctx.font = '20px monospace';
+        ctx.fillText(message + ' ' + number, 10, 50);
+    }
+
+    function drawPixel(x, y) {
+        ctx.fillStyle = 'white'; // Цвет закрашивания
+        ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+    }
+
+    function drawLine(x1, y1, x2, y2) {
+        ctx.strokeStyle = 'white'; // Цвет линии
+        ctx.beginPath();
+        ctx.moveTo(x1 * pixelSize, y1 * pixelSize);
+        ctx.lineTo(x2 * pixelSize, y2 * pixelSize);
+        ctx.stroke();
+    }
+
+    function plotEquation(expression) {
+        clearScreen();
+        ctx.fillStyle = 'white';
+        ctx.strokeStyle = 'white';
+        ctx.beginPath();
+        for (let x = -256; x <= 256; x++) {
+            const y = eval(expression.replace(/A/g, x));
+            ctx.lineTo(x + 256, 128 - y); // Центрируем график
+        }
+        ctx.stroke();
+    }
+
+    function parseVariable(value, variables) {
+        if (isNaN(value)) { // Check if the value is not a number
+            return variables[value] !== undefined ? variables[value] : 0; // Return variable value or 0 if undefined
+        }
+        return parseInt(value); // Return the number as an integer
+    }
+
+    function solveEquation(equation) {
+        // Удаляем пробелы
+        equation = equation.replace(/\s+/g, '');
+
+        // Разделяем уравнение на левую и правую части
+        const parts = equation.split('=');
+        if (parts.length !== 2) {
+            return 'Неверный формат уравнения';
+        }
+
+        const left = parts[0];
+        const right = parseFloat(parts[1]);
+
+        // Регулярное выражение для поиска всех членов с x
+        const regex = /([+-]?\d*\.?\d*)x/g;
+        let totalCoefficient = 0;
+        let constantLeft = 0;
+        let constantRight = right;
+
+        // Находим все коэффициенты x
+        let match;
+        while ((match = regex.exec(left)) !== null) {
+            const coefficient = match[1] === '' || match[1] === '+' ? 1 : (match[1] === '-' ? -1 : parseFloat(match[1]));
+            totalCoefficient += coefficient;
+        }
+
+        // Удаляем все члены с x из левой части
+        const withoutX = left.replace(regex, '');
+        constantLeft = eval(withoutX); // Используем eval для вычисления оставшихся чисел
+
+        // Решаем уравнение
+        const x = (constantRight - constantLeft) / totalCoefficient;
+
+        return `x = ${x}`;
+    }
+</script>
+
+</body>
+</html>
