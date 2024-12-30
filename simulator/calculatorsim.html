@@ -3,22 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Инженерный калькулятор</title>
+    <title>Калькулятор</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #f4f4f4;
+            background-color: #f0f0f0;
         }
 
         .calculator {
-            background: white;
-            padding: 20px;
+            background-color: #fff;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 400px;
         }
 
         #display {
@@ -38,11 +38,11 @@
         button {
             padding: 20px;
             font-size: 18px;
-            cursor: pointer;
             border: none;
             border-radius: 5px;
             background-color: #007bff;
             color: white;
+            cursor: pointer;
         }
 
         button:hover {
@@ -52,9 +52,11 @@
 </head>
 <body>
     <div class="calculator">
-        <input type="text" id="display" disabled>
+        <input type="text" id="display" readonly>
         <div class="buttons">
             <button onclick="clearDisplay()">C</button>
+            <button onclick="appendToDisplay('(')">(</button>
+            <button onclick="appendToDisplay(')')">)</button>
             <button onclick="appendToDisplay('7')">7</button>
             <button onclick="appendToDisplay('8')">8</button>
             <button onclick="appendToDisplay('9')">9</button>
@@ -70,16 +72,29 @@
             <button onclick="appendToDisplay('0')">0</button>
             <button onclick="calculateResult()">=</button>
             <button onclick="appendToDisplay('+')">+</button>
-            <button onclick="appendToDisplay('Math.sqrt(')">√</button>
-            <button onclick="appendToDisplay('Math.log(')">log</button>
-            <button onclick="appendToDisplay('Math.pow(')">^</button>
+            <button onclick="appendToDisplay('**')">x^y</button>
+            <button onclick="appendToDisplay('sqrt(')">√x</button>
             <button onclick="appendToDisplay('Math.sin(')">sin</button>
             <button onclick="appendToDisplay('Math.cos(')">cos</button>
             <button onclick="appendToDisplay('Math.tan(')">tan</button>
-            <button onclick="reverseLast()">←</button>
+            <button onclick="appendToDisplay('Math.asin(')">arcsin</button>
+            <button onclick="appendToDisplay('Math.acos(')">arccos</button>
+            <button onclick="appendToDisplay('Math.atan(')">arctan</button>
+            <button onclick="appendToDisplay('Math.log10(')">log</button>
+            <button onclick="appendToDisplay('Math.log(')">ln</button>
+            <button onclick="appendToDisplay('Math.exp(')">e^x</button>
+            <button onclick="calculateMean()">Mean</button>
+            <button onclick="calculateStdDev()">Std Dev</button>
+            <button onclick="calculateVariance()">Variance</button>
+            <button onclick="appendToDisplay('M+')">M+</button>
+            <button onclick="appendToDisplay('MR')">MR</button>
+            <button onclick="clearMemory()">MC</button>
+            <button onclick="convertLength()">Convert Length</button>
         </div>
     </div>
     <script>
+        let memory = 0;
+
         function appendToDisplay(value) {
             document.getElementById('display').value += value;
         }
@@ -91,17 +106,41 @@
         function calculateResult() {
             const display = document.getElementById('display');
             try {
-                const result = eval(display.value.replace(/Math\.sqrt\(([^)]+)\)/g, 'Math.sqrt($1)')
-                                                .replace(/Math\.log\(([^)]+)\)/g, 'Math.log($1)'));
-                display.value = result;
+                display.value = eval(display.value.replace(/\*\*/g, '^').replace(/sqrt\(([^)]+)\)/g, 'Math.sqrt($1)'));
             } catch (error) {
                 display.value = 'Ошибка';
             }
         }
 
-        function reverseLast() {
-            const display = document.getElementById('display');
-            display.value = display.value.slice(0, -1);
+        function calculateMean() {
+            const values = prompt("Введите числа через запятую:").split(',').map(Number);
+            const mean = values.reduce((a, b) => a + b, 0) / values.length;
+            alert("Среднее значение: " + mean);
+        }
+
+        function calculateStdDev() {
+            const values = prompt("Введите числа через запятую:").split(',').map(Number);
+            const mean = values.reduce((a, b) => a + b, 0) / values.length;
+            const stdDev = Math.sqrt(values.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / values.length);
+            alert("Стандартное отклонение: " + stdDev);
+        }
+
+        function calculateVariance() {
+            const values = prompt("Введите числа через запятую:").split(',').map(Number);
+            const mean = values.reduce((a, b) => a + b, 0) / values.length;
+            const variance = values.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / values.length;
+            alert("Дисперсия: " + variance);
+        }
+
+        function clearMemory() {
+            memory = 0;
+            alert("Память очищена");
+        }
+
+        function convertLength() {
+            const value = prompt("Введите длину в метрах:");
+            const converted = value * 39.3701; // Преобразование в дюймы
+            alert(value + " метров = " + converted + " дюймов");
         }
     </script>
 </body>
