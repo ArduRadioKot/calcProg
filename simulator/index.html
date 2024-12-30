@@ -3,41 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Интерпретатор ЯП</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 20px;
-        }
-        #codeEditor {
-            width: 80%;
-            height: 200px;
-            font-family: monospace;
-            border: 1px solid #ccc;
-            padding: 10px;
-            resize: none;
-        }
-        #display {
-            width: 512px; /* 128 * 4 */
-            height: 128px; /* 32 * 4 */
-            background-color: black;
-            margin-top: 10px;
-            color: white; /* Цвет текста */
-            font-family: monospace; /* Шрифт для текста */
-            position: relative;
-            overflow: hidden; /* Скрыть переполнение */
-        }
-        button {
-            margin: 5px;
-        }
-    </style>
+    <title>FcalcOS simulator</title>
+    <link rel="slylesheet" href="style.css">
 </head>
 <body>
 
-<h1>Интерпретатор ЯП</h1>
+<h1>FcalcOS</h1>
 <textarea id="codeEditor" placeholder="Введите код ЯП здесь..."></textarea><br>
 <button onclick="runCode()">Выполнить</button>
 <button onclick="clearScreen()">Очистить экран</button>
@@ -111,7 +82,7 @@
             } else if (line.startsWith('WAIT')) {
                 const waitTime = parseInt(line.split(' ')[1]);
                 // Здесь можно добавить задержку, но в реальном времени это не будет работать в браузере
-            } else if (line.startsWith('END_GAME')) {
+            } else if (line.startsWith('END')) {
                 alert('Программа завершена.');
                 break;
             } else if (line.startsWith('DRAW_PIXEL')) {
@@ -223,16 +194,16 @@
     }
 
     function plotEquation(expression) {
-        clearScreen();
-        ctx.fillStyle = 'white';
-        ctx.strokeStyle = 'white';
-        ctx.beginPath();
-        for (let x = -256; x <= 256; x++) {
-            const y = eval(expression.replace(/A/g, x));
-            ctx.lineTo(x + 256, 128 - y); // Центрируем график
-        }
-        ctx.stroke();
+    ctx.fillStyle = 'black'; // Устанавливаем цвет фона
+    ctx.fillStyle = 'white';
+    ctx.strokeStyle = 'white';
+    ctx.beginPath();
+    for (let x = -256; x <= 256; x++) {
+        const y = eval(expression.replace(/A/g, x));
+        ctx.lineTo(x + 256, 128 - y); // Центрируем график
     }
+    ctx.stroke();
+}
 
     function parseVariable(value, variables) {
         if (isNaN(value)) { // Check if the value is not a number

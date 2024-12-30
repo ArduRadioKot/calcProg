@@ -1,0 +1,28 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px;
+}
+#codeEditor {
+    width: 80%;
+    height: 200px;
+    font-family: monospace;
+    border: 1px solid #ccc;
+    padding: 10px;
+    resize: none;
+}
+#display {
+    width: 512px; /* 128 * 4 */
+    height: 128px; /* 32 * 4 */
+    background-color: black;
+    margin-top: 10px;
+    color: white; /* Цвет текста */
+    font-family: monospace; /* Шрифт для текста */
+    position: relative;
+    overflow: hidden; /* Скрыть переполнение */
+}
+button {
+    margin: 5px;
+}
