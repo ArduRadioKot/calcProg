@@ -34,7 +34,7 @@
     }
 
     function showHelp() {
-        alert("Синтаксис ЯП:\n1. INIT\n2. CLEAR_SCREEN\n3. SET_VARIABLE A 45\n4. INPUT A \"Введите значение x: \"\n5. CALCULATE B = A * A + 2 * A + 1\n6. SHOW_MESSAGE B 3\n7. LINE x1 y1 x2 y2\n8. PLOT A^2 + 2*A + 1\n9. WAIT 2000\n10. END_GAME\n11. DRAW_PIXEL x y\n12. CREATE_OBJECT player\n13. SET_POSITION player 10 10\n14. MOVE_OBJECT player UP 1\n15. ADD_EVENT KEY_PRESS\n16. ON_EVENT KEY_PRESS MOVE_OBJECT player RIGHT 1\n17. SOLVE A^2 + 2*A + 1 = 0\n18. IF B < 0\n19. ELSE\n20. ENDIF\n21. FOR I = 1 TO 10\n22. NEXT\n23. CREATE_ARRAY myArray 10\n24. SET_ARRAY_VALUE myArray 0 5\n25. GET_ARRAY_VALUE myArray 0 A");
+        alert("Синтаксис ЯП:\n1. INIT 123\n2. CLEAR\n3. VAR A 45\n4. INPUT A\n5. CIRCLE x1 y1 x2 y2\n6. TEXT B\n7. WAIT 2000\n8. END\n9. PIXEL x y\n10. OBJ player\n11. SET_POS player 10 10\n12. MOVE player UP 1\n13. EVENT KEY_PRESS\n14. ON_EVENT KEY_PRESS MOVE player RIGHT 1\n15. PLOT A^2 + 2*A + 1\n16. SOLVE A^2 + 2*A + 1 = 0\n17. IF B < 0\n18. LINE x1 y1 x2 y2\n19. ENDIF\n20. FOR I = 1 TO 10\n21. NEXT\n22. A = RAND\n23. ARRAY myArray 10\n24. SARRAY myArray 0 5\n25. GARRAY myArray 0 A");
     }
 
     function runCode() {
@@ -48,27 +48,21 @@
             line = line.trim();
             if (line.startsWith('INIT')) {
                 // Инициализация программы
-            } else if (line.startsWith('CLEAR_SCREEN')) {
+            } else if (line.startsWith('CLEAR')) {
                 clearScreen();
-            } else if (line.startsWith('SET_VARIABLE')) {
+            } else if (line.startsWith('VAR')) {
                 const parts = line.split(' ');
                 variables[parts[1]] = parseFloat(parts[2]);
             } else if (line.startsWith('INPUT')) {
                 const parts = line.split(' ');
-                const promptMessage = parts.slice(2).join (' ').replace(/"/g, '');
+                const promptMessage = `Введите значение для ${parts[1]}:`;
                 const userInput = prompt(promptMessage);
                 variables[parts[1]] = parseFloat(userInput);
-            } else if (line.startsWith('CALCULATE')) {
-                const parts = line.split('=');
-                const expression = parts[1].trim();
-                const result = eval(expression.replace(/([A-J])/g, (match) => variables[match] || 0));
-                variables[parts[0].split(' ')[1]] = result;
-            } else if (line.startsWith('SHOW_MESSAGE')) {
+            } else if (line.startsWith('TEXT')) {
                 const parts = line.split(' ');
                 const variableName = parts[1];
-                const message = parts.slice(2).join(' ').replace(/"/g, '');
                 const number = variables[variableName] !== undefined ? variables[variableName] : 'undefined';
-                displayMessage(number, message);
+                displayMessage(number, "Сообщение:");
             } else if (line.startsWith('LINE')) {
                 const parts = line.split(' ');
                 const x1 = parseVariable(parts[1], variables);
@@ -85,18 +79,18 @@
             } else if (line.startsWith('END')) {
                 alert('Программа завершена.');
                 break;
-            } else if (line.startsWith('DRAW_PIXEL')) {
+            } else if (line.startsWith('PIXEL')) {
                 const parts = line.split(' ');
                 const x = parseVariable(parts[1], variables);
                 const y = parseVariable(parts[2], variables);
                 drawPixel(x, y);
-            } else if (line.startsWith('CREATE_OBJECT')) {
+            } else if (line .startsWith('OBJ')) {
                 // Логика создания объекта (если требуется)
-            } else if (line.startsWith('SET_POSITION')) {
+            } else if (line.startsWith('SET_POS')) {
                 // Логика установки позиции объекта (если требуется)
-            } else if (line.startsWith('MOVE_OBJECT')) {
+            } else if (line.startsWith('MOVE')) {
                 // Логика перемещения объекта (если требуется)
-            } else if (line.startsWith('ADD_EVENT')) {
+            } else if (line.startsWith('EVENT')) {
                 // Логика добавления события (если требуется)
             } else if (line.startsWith('ON_EVENT')) {
                 // Логика обработки события (если требуется)
@@ -142,17 +136,17 @@
                 } else if (line.startsWith('NEXT')) {
                     if (currentLoop) {
                         if (currentLoop.current < currentLoop.end) {
- currentLoop.current++;
+                            currentLoop.current++;
                         } else {
                             currentLoop = null;
                         }
                     }
-                } else if (line.startsWith('CREATE_ARRAY')) {
+                } else if (line.startsWith('ARRAY')) {
                     const parts = line.split(' ');
                     const arrayName = parts[1];
                     const size = parseInt(parts[2]);
                     variables[arrayName] = new Array(size).fill(0);
-                } else if (line.startsWith('SET_ARRAY_VALUE')) {
+                } else if (line.startsWith('SARRAY')) {
                     const parts = line.split(' ');
                     const arrayName = parts[1];
                     const index = parseInt(parts[2]);
@@ -160,7 +154,7 @@
                     if (variables[arrayName]) {
                         variables[arrayName][index] = value;
                     }
-                } else if (line.startsWith('GET_ARRAY_VALUE')) {
+                } else if (line.startsWith('GARRAY')) {
                     const parts = line.split(' ');
                     const arrayName = parts[1];
                     const index = parseInt(parts[2]);
@@ -168,6 +162,10 @@
                     if (variables[arrayName]) {
                         variables[variableName] = variables[arrayName][index];
                     }
+                } else if (line.startsWith('RAND')) {
+                    const parts = line.split(' ');
+                    const variableName = parts[1];
+                    variables[variableName] = Math.random(); // Генерация случайного числа
                 }
             }
         }
@@ -189,21 +187,21 @@
         ctx.strokeStyle = 'white'; // Цвет линии
         ctx.beginPath();
         ctx.moveTo(x1 * pixelSize, y1 * pixelSize);
-        ctx.lineTo(x2 * pixelSize, y2 * pixelSize);
+        ctx.lineTo(x2 * pixelSize, y 1 * pixelSize);
         ctx.stroke();
     }
 
     function plotEquation(expression) {
-    ctx.fillStyle = 'black'; // Устанавливаем цвет фона
-    ctx.fillStyle = 'white';
-    ctx.strokeStyle = 'white';
-    ctx.beginPath();
-    for (let x = -256; x <= 256; x++) {
-        const y = eval(expression.replace(/A/g, x));
-        ctx.lineTo(x + 256, 128 - y); // Центрируем график
+        ctx.fillStyle = 'black'; // Устанавливаем цвет фона
+        ctx.fillStyle = 'white';
+        ctx.strokeStyle = 'white';
+        ctx.beginPath();
+        for (let x = -256; x <= 256; x++) {
+            const y = eval(expression.replace(/A/g, x));
+            ctx.lineTo(x + 256, 128 - y); // Центрируем график
+        }
+        ctx.stroke();
     }
-    ctx.stroke();
-}
 
     function parseVariable(value, variables) {
         if (isNaN(value)) { // Check if the value is not a number
