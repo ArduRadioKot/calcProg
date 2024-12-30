@@ -15,12 +15,19 @@
 <button onclick="endGame()">Завершить</button>
 <button onclick="showHelp()">Помощь</button>
 
+<!-- Добавленные кнопки -->
+<button id="key1">Key 1</button>
+<button id="key2">Key 2</button>
+<button id="key3">Key 3</button>
+<button id="key4">Key 4</button>
+
 <canvas id="display" width="512" height="128"></canvas>
 
 <script>
     const canvas = document.getElementById('display');
     const ctx = canvas.getContext('2d');
     const pixelSize = 4; // Размер одной точки в пикселях
+    const keys = { key1: false, key2: false, key3: false, key4: false }; // Объект для хранения состояния кнопок
 
     function clearScreen() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -36,6 +43,8 @@
     function showHelp() {
         alert("Синтаксис ЯП:\n1. INIT 123\n2. CLEAR\n3. VAR A 45\n4. INPUT A\n5. CIRCLE x1 y1 x2 y2\n6. TEXT B\n7. WAIT 2000\n8. END\n9. PIXEL x y\n10. OBJ player\n11. SET_POS player 10 10\n12. MOVE player UP 1\n13. EVENT KEY_PRESS\n14. ON_EVENT KEY_PRESS MOVE player RIGHT 1\n15. PLOT A^2 + 2*A + 1\n16. SOLVE A^2 + 2*A + 1 = 0\n17. IF B < 0\n18. LINE x1 y1 x2 y2\n19. ENDIF\n20. FOR I = 1 TO 10\n21. NEXT\n22. A = RAND\n23. ARRAY myArray 10\n24. SARRAY myArray 0 5\n25. GARRAY myArray 0 A");
     }
+
+
 
     function runCode() {
         const code = document.getElementById('codeEditor').value.split('\n');
@@ -63,7 +72,7 @@
                 const variableName = parts[1];
                 const number = variables[variableName] !== undefined ? variables[variableName] : 'undefined';
                 displayMessage(number, "Сообщение:");
-            } else if (line.startsWith('LINE')) {
+            } else if (line.startsWith('LINE')){
                 const parts = line.split(' ');
                 const x1 = parseVariable(parts[1], variables);
                 const y1 = parseVariable(parts[2], variables);
@@ -84,7 +93,7 @@
                 const x = parseVariable(parts[1], variables);
                 const y = parseVariable(parts[2], variables);
                 drawPixel(x, y);
-            } else if (line .startsWith('OBJ')) {
+            } else if (line.startsWith('OBJ')) {
                 // Логика создания объекта (если требуется)
             } else if (line.startsWith('SET_POS')) {
                 // Логика установки позиции объекта (если требуется)
@@ -166,6 +175,11 @@
                     const parts = line.split(' ');
                     const variableName = parts[1];
                     variables[variableName] = Math.random(); // Генерация случайного числа
+                } else if (line.startsWith('KEY')) {
+                    const keyName = line.split(' ')[1];
+                    if (keys[keyName]) {
+                        displayMessage('Кнопка ' + keyName + ' нажата', "Состояние кнопки:");
+                    }
                 }
             }
         }
@@ -187,7 +201,7 @@
         ctx.strokeStyle = 'white'; // Цвет линии
         ctx.beginPath();
         ctx.moveTo(x1 * pixelSize, y1 * pixelSize);
-        ctx.lineTo(x2 * pixelSize, y 1 * pixelSize);
+        ctx.lineTo(x2 * pixelSize, y2 * pixelSize);
         ctx.stroke();
     }
 
